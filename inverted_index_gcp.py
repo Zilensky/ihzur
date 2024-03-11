@@ -90,7 +90,9 @@ TF_MASK = 2 ** 16 - 1 # Masking the 16 low bits of an integer
 
 class InvertedIndex:
     def __init__(self, docs={}):
+        #len of each document
         self.doc_len = {}
+        #dict of id to title
         self.idtotitledict = {}
         """ Initializes the inverted index and add documents to it (if provided).
         Parameters:
