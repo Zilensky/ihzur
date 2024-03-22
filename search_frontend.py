@@ -19,8 +19,8 @@ import nltk
 from nltk.corpus import stopwords
 import math
 import traceback
-from autocorrect import Speller
 from urllib.parse import quote
+import time
 
 
 class MyFlaskApp(Flask):
@@ -100,21 +100,35 @@ def search():
                         "may", "first", "see", "history", "people", "one", "two",
                         "part", "thumb", "including", "second", "following",
                         "many", "however", "would", "became"]
-
+    commom_words = [
+        "year", "birth", "state", "new", "live", "name", "time", "born", "unit", "nation",
+        "work", "place", "use", "list", "american"
+    ]
     all_stopwords = english_stopwords.union(corpus_stopwords)
     # Add stemmer and Speller corrections
     ps = nltk.stem.PorterStemmer()
     res = []
-    spell = Speller()
     query = request.args.get('query', '')
     if len(query) == 0:
         return jsonify(res)
     # Tokenize and process the query
-    query_terms = tokenize_and_steem_word(query)  # Split query into individual terms
+    query_terms = []
+    query_terms_before = tokenize_and_steem_word(query)
+    for word in query_terms_before:
+        if word not in all_stopwords:
+            query_terms.append(word)
+    len_query = len(query_terms)
+    # use title or body index
+
+    if len_query >= 3:
+        bucket_name = 'finaldatabody'
+    else:
+        bucket_name = 'finaldatatitle'
+
     # Retrieve the inverted index for titles
     file_path = 'postings_gcp/index.pkl'
     storagegcp = storage.Client()
-    bucket = storagegcp.bucket('works89651257')
+    bucket = storagegcp.bucket(bucket_name)
     passage = bucket.blob(file_path)
     content = passage.download_as_bytes()
     index_title = pickle.loads(content)
@@ -126,13 +140,13 @@ def search():
     # Calculate BM25 scores for each query term in each document
     try:
         for term in query_terms:
+
             # make sure the term is fine to work  with all the crrections
-            if term in all_stopwords:
-                continue
-            term = spell(term)
             term = ps.stem(term)
+
             # Retrieve the posting list for the query term
-            posting_list = index_title.read_a_posting_list('.', term, 'works89651257')
+            posting_list = index_title.read_a_posting_list('.', term, bucket_name)
+
             # Calculate IDF for the query term
             idf = math.log((len(doc_len_use) - len(posting_list) + 0.5) / (len(posting_list) + 0.5))
             # Update BM25 scores for documents containing the query term
@@ -147,9 +161,13 @@ def search():
                     bm25_scores[doc_id] += bm25
             except Exception as e:
                 return jsonify(str(traceback.print_exc()), "first")
+
+
     except Exception as e:
         return jsonify(str(e), "sirst")
+
     try:
+
         # Sort the search results based on BM25 scores
         sorted_results = sorted(bm25_scores.items(), key=lambda x: x[1], reverse=True)
         # Retrieve titles for the sorted documents
@@ -247,6 +265,6 @@ def get_pageview():
 
 if __name__ == '__main__':
     # run the Flask RESTful API, make the server publicly available (host='0.0.0.0') on port 8080
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True, use_reloader=False)
 
 
