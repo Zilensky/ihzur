@@ -1,4 +1,4 @@
-# Information Retrieval Engine
+# Information Retrieval Engine (GROUP #16)
 In this project we developed an information retrieval engine focused on analyzing all Wikipedia corpus.
 This engine aims to identify the most pertinent Wikipedia documents based on a given query.
 During the preprocessing phase, we leveraged Google Cloud Platform (GCP) for storage and computing power and utilized various Python libraries including ntlk, pandas and others.
