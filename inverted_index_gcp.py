@@ -13,7 +13,7 @@ from google.cloud import storage
 from collections import defaultdict
 from contextlib import closing
 
-PROJECT_ID = 'x-signifier-416215'
+PROJECT_ID = 'dataret'
 def get_bucket(bucket_name):
     return storage.Client(PROJECT_ID).bucket(bucket_name)
 
