@@ -87,7 +87,7 @@ def search_body():
 
 
 def tokenize_and_steem_word(text):
-    RE_WORD = re.compile(r"""[\#\@\w](['\-]?\w){2,24}""", re.UNICODE)
+    RE_WORD = re.compile(r"""[\#\@\w](['\-]?\w){1,24}""", re.UNICODE)
     return [token.group() for token in RE_WORD.finditer(text.lower())]
 
 
