@@ -120,7 +120,7 @@ def search():
     len_query = len(query_terms)
     # use title or body index
 
-    if len_query >= 3:
+    if len_query >= 4:
         bucket_name = 'finaldatabody'
     else:
         bucket_name = 'finaldatatitle'
